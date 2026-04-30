@@ -1,0 +1,90 @@
+#: import DEVICE_TYPE carbonkivy.utils.DEVICE_TYPE
+
+
+<PlayerLayout>:
+    size_hint_x: 1
+    size_hint_y: None if (DEVICE_TYPE == "mobile") else 1
+    width: dp(576)
+    height: self.width * 9/16
+    bg_color: app.background_hover
+
+
+<PlayerControls>:
+    canvas.after:
+        Color:
+            rgba: app.overlay
+        Line:
+            width: dp(2)
+            cap: "square"
+            points: [self.x, self.top + dp(2), self.width, self.top + dp(2)]
+        Color:
+            rgba: app.interactive
+        Line:
+            width: dp(2)
+            cap: "square"
+            points: [self.x, self.top + dp(2), self.progressive_width, self.top + dp(2)]
+        Ellipse:
+            pos: self.progressive_width, self.top - dp(4)
+            size: dp(12), dp(12)
+            angle_start: 0
+            angle_end: 360
+    size_hint: 1, None
+    adaptive: [False, True]
+    bg_color: app.layer_selected_01
+
+    PlayerButton:
+        icon: "skip--back"
+        on_press:
+            root.seek_backward()
+
+    PlayerButton:
+        icon: "pause" if root._playing else "play"
+        on_press:
+            root.pause() if root._playing else root.play()
+
+    PlayerButton:
+        icon: "skip--forward"
+        on_press:
+            root.seek_forward()
+
+    PlayerButton:
+        icon: "volume--up"
+
+    AnchorLayout:
+        anchor_x: "right"
+
+        CGridLayout:
+            rows: 1
+            adaptive: [True, True]
+
+            PlayerButton:
+                icon: "closed-caption"
+
+            PlayerButton:
+                icon: "settings"
+
+            PlayerButton:
+                icon: "maximize" if not Window.fullscreen else "minimize"
+
+
+<Player>:
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, 1 # Red background (R, G, B, A)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    size_hint: 1, 1
+    source: None
+
+
+<PlayerButton>:
+    line_color_focus: app.transparent
+    role: "Medium" if DEVICE_TYPE == "mobile" else "Large Productive"
+
+
+<PlayerLoadingLayout>:
+    opacity: 1 if self.loading else 0
+    CLoadingIndicator:
+        active: root.loading
+        role: "Small"
