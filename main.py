@@ -1,7 +1,7 @@
 import os
 import sys
 
-# os.environ["devicetype"] = "mobile"
+os.environ["devicetype"] = "mobile"
 
 from kivy.resources import resource_add_path
 
@@ -47,7 +47,7 @@ CScreen:
                 loader: player_loading
                 size_hint: 1, 1
                 fit_mode: "contain"
-                filename: "https://scienceandfilm.org/uploads/videos/files/The_Fountain_%5bTrailer%5d_HD_1080p.mp4"
+                filename: "https://storage.googleapis.com/exoplayer-test-media-1/mp4/android-screens-10s.mp4"
 
             PlayerLoadingLayout:
                 id: player_loading
