@@ -1,24 +1,38 @@
 from __future__ import annotations
 
-__all__ = ("PlayerBase", "PlayerControls", "Player")
+__all__ = (
+    "PlayerBase",
+    "PlayerControls",
+    "Player",
+    "PlayerLayout",
+    "PlayerLoadingLayout",
+)
 
+import time
 import queue
 import videonative
 import threading
 
 from kivy.animation import Animation
 from kivy.clock import Clock
-from kivy.core.window import Window
 from kivy.graphics.texture import Texture
 from kivy.uix.image import AsyncImage
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.properties import BooleanProperty, ObjectProperty, StringProperty, NumericProperty
+from kivy.properties import (
+    BooleanProperty,
+    ObjectProperty,
+    StringProperty,
+    NumericProperty,
+)
 
-from carbonkivy.behaviors import HoverBehavior, StateFocusBehavior
+from carbonkivy.behaviors import HoverBehavior
 from carbonkivy.uix.boxlayout import CBoxLayout
 from carbonkivy.uix.relativelayout import CRelativeLayout
 from carbonkivy.uix.shell import UIShellButton
 from carbonkivy.uix.loading import CLoadingLayout
+from carbonkivy.utils import DEVICE_TYPE
+
+from android_utils import maximize_video, minimize_video
 
 
 class PlayerLoadingLayout(CLoadingLayout):
@@ -67,7 +81,7 @@ class PlayerBase(AsyncImage):
             temp_decoder.start()
 
             first_frame = temp_decoder.get_next_frame()
-            
+
             if first_frame is None:
                 raise RuntimeError("Failed to read the first frame of the video.")
 
@@ -81,7 +95,7 @@ class PlayerBase(AsyncImage):
     def _on_video_loaded(self, loaded_decoder, first_frame) -> None:
         """THIS RUNS ON THE UI THREAD: Safely updates Kivy widgets."""
         self.decoder = loaded_decoder
-        
+
         self.height_px, self.width_px, _ = first_frame.shape
 
         self.texture = Texture.create(
@@ -104,13 +118,20 @@ class PlayerBase(AsyncImage):
 
             if frame_arr is None:
                 if self._running:
-                    self.frame_queue.put(None)
+                    try:
+                        self.frame_queue.put(None, timeout=0.1)
+                    except queue.Full:
+                        pass
                 break
 
-            self.frame_queue.put(frame_arr.tobytes())
+            while self._running:
+                try:
+                    self.frame_queue.put(frame_arr.tobytes(), timeout=0.1)
+                    break
+                except queue.Full:
+                    continue
 
     def update_frame(self, dt) -> None:
-        """THIS RUNS ON THE UI THREAD: Grabs bytes from the queue and draws them."""
         try:
             frame_bytes = self.frame_queue.get_nowait()
 
@@ -118,8 +139,9 @@ class PlayerBase(AsyncImage):
                 self.buffering = False
 
             if frame_bytes is None:
+                self.current_pos = self.duration
+                self.current_pos_ratio = 1.0
                 self.pause()
-                self.decoder.stop()
                 return
 
             self.texture.blit_buffer(
@@ -140,7 +162,11 @@ class PlayerBase(AsyncImage):
         if self._running:
             return
 
+        if self.duration > 0 and self.current_pos >= self.duration - 0.2:
+            self.seek(-self.current_pos)
+
         self._running = True
+        self._paused = False
 
         if self.decoder:
             self.decoder.start()
@@ -153,6 +179,7 @@ class PlayerBase(AsyncImage):
 
     def stop(self, *args) -> None:
         self._running = False
+        self._paused = False
         Clock.unschedule(self.update_frame)
 
         while not self.frame_queue.empty():
@@ -161,18 +188,20 @@ class PlayerBase(AsyncImage):
             except queue.Empty:
                 break
 
-        if self.read_thread and self.read_thread.is_alive():
-            self.read_thread.join(timeout=0.5)
-
         if self.decoder:
             self.decoder.stop()
 
+        if self.read_thread and self.read_thread.is_alive():
+            self.read_thread.join(timeout=1.0)
+        self.read_thread = None
+
     def pause(self, *args) -> None:
-        self._running = False 
-        
+        self._running = False
+        self._paused = True
+
         if self.decoder:
             self.decoder.pause()
-            
+
         Clock.unschedule(self.update_frame)
 
         while not self.frame_queue.empty():
@@ -188,15 +217,30 @@ class PlayerBase(AsyncImage):
     def seek(self, offset: float | int) -> None:
         if not self.decoder:
             return
-            
-        was_running = self._running
-        current_pos = self.decoder.get_position()
-        
-        if was_running:
-            self.pause() 
 
-        new_pos = max(0.0, current_pos + offset)
+        was_running = self._running
+        new_pos = max(0.0, min(self.duration, self.current_pos + offset))
+
+        self.current_pos = new_pos
+        self.current_pos_ratio = self.current_pos / self.duration
+
+        self._running = False
+        Clock.unschedule(self.update_frame)
+
+        if self.decoder:
+            self.decoder.pause()
+
         self.decoder.seek(new_pos)
+
+        while not self.frame_queue.empty():
+            try:
+                self.frame_queue.get_nowait()
+            except queue.Empty:
+                break
+
+        if self.read_thread and self.read_thread.is_alive():
+            self.read_thread.join(timeout=1.0)
+        self.read_thread = None
 
         if was_running:
             self.play()
@@ -209,10 +253,45 @@ class PlayerBase(AsyncImage):
                 self.loader.loading = False
         except:
             pass
-            
+
+    def set_volume(self, volume: float) -> None:
+        if self.decoder:
+            clamped_vol = max(0.0, min(1.0, volume))
+            self.decoder.set_volume(clamped_vol)
+
+    def restart(self, url: str, *args) -> None:
+        """Safely stops the current video, frees memory, and starts a new one."""
+        self.buffering = True
+
+        self.stop()
+        self.decoder = None
+
+        self.current_pos = 0.0
+        self.current_pos_ratio = 0.0
+        self.duration = 0.0
+
+        self.texture = None
+        self.canvas.ask_update()
+
+        if self.filename == url:
+            self.open_video()
+        else:
+            self.filename = url
+
 
 class PlayerLayout(CRelativeLayout):
-    pass
+    is_fullscreen = BooleanProperty(False)
+
+    def toggle_fullscreen(self):
+        self.is_fullscreen = not self.is_fullscreen
+        
+        if self.is_fullscreen:
+            self.size_hint_y = 1
+            maximize_video()
+        else:
+            self.size_hint_y = None if DEVICE_TYPE == "mobile" else 1
+            self.height = self.width * 9/16
+            minimize_video()
 
 
 class Player(PlayerBase):
@@ -228,6 +307,14 @@ class PlayerControls(HoverBehavior, CBoxLayout):
     progressive_width = NumericProperty()
 
     animation = ObjectProperty()
+
+    duration_timestamp = StringProperty()
+
+    current_timestamp = StringProperty()
+
+    volume_enabled = BooleanProperty(True)
+
+    maximized = BooleanProperty(False)
 
     def __init__(self, *args, **kwargs):
         super(PlayerControls, self).__init__(*args, **kwargs)
@@ -262,7 +349,6 @@ class PlayerControls(HoverBehavior, CBoxLayout):
         if not self.hover:
             self.animation = Animation(opacity=0, d=0.5)
             self.event = Clock.schedule_once(lambda dt: self.animation.start(self), 3)
-        
 
     def on_touch_down(self, *args) -> None:
         self.opacity = 1
@@ -276,6 +362,18 @@ class PlayerControls(HoverBehavior, CBoxLayout):
         self.master.bind(_running=self.set_state)
         self.master.bind(_paused=self.set_state)
         self.master.bind(current_pos_ratio=self.set_progress)
+        self.master.bind(duration=self.set_dt)
+        self.master.bind(current_pos=self.set_ct)
+
+    def set_dt(self, *args) -> None:
+        self.duration_timestamp = (
+            f"{time.strftime("%H:%M:%S", time.gmtime(self.master.duration))}"
+        )
+
+    def set_ct(self, *args) -> None:
+        self.current_timestamp = (
+            f"{time.strftime("%H:%M:%S", time.gmtime(self.master.current_pos))}"
+        )
 
     def set_state(self, *args) -> None:
         self._playing = self.master._running and (not self.master._paused)
@@ -298,6 +396,11 @@ class PlayerControls(HoverBehavior, CBoxLayout):
     def seek_backward(self, *args) -> None:
         self.master.seek(-5)
 
+    def on_volume_enabled(self, *args) -> None:
+        self.master.set_volume(1.0) if self.volume_enabled else self.master.set_volume(0.0)
+
+    def on_maximized(self, *args) -> None:
+        self.parent.toggle_fullscreen()
 
 class PlayerButton(UIShellButton):
     pass

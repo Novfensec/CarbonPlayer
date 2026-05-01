@@ -31,24 +31,38 @@
     size_hint: 1, None
     adaptive: [False, True]
     bg_color: app.layer_selected_01
+    spacing: dp(8)
+    padding: dp(4)
 
-    PlayerButton:
-        icon: "skip--back"
-        on_press:
-            root.seek_backward()
+    CGridLayout:
+        adaptive: [True, True]
+        rows: 1
 
-    PlayerButton:
-        icon: "pause" if root._playing else "play"
-        on_press:
-            root.pause() if root._playing else root.play()
+        PlayerButton:
+            icon: "skip--back"
+            on_press:
+                root.seek_backward()
 
-    PlayerButton:
-        icon: "skip--forward"
-        on_press:
-            root.seek_forward()
+        PlayerButton:
+            icon: "pause" if root._playing else "play"
+            on_press:
+                root.pause() if root._playing else root.play()
 
-    PlayerButton:
-        icon: "volume--up"
+        PlayerButton:
+            icon: "skip--forward"
+            on_press:
+                root.seek_forward()
+
+        PlayerButton:
+            icon: "volume--up" if root.volume_enabled else "volume--mute"
+            on_press:
+                root.volume_enabled = not root.volume_enabled
+
+    CLabel:
+        text: f"{root.current_timestamp} / {root.duration_timestamp}"
+        pos_hint: {"center_y": 0.5}
+        style: "label_01"
+        height: self.texture_size[1]
 
     AnchorLayout:
         anchor_x: "right"
@@ -58,19 +72,18 @@
             adaptive: [True, True]
 
             PlayerButton:
-                icon: "closed-caption"
-
-            PlayerButton:
                 icon: "settings"
 
             PlayerButton:
-                icon: "maximize" if not Window.fullscreen else "minimize"
+                icon: "maximize" if not root.maximized else "minimize"
+                on_press:
+                    root.maximized = not root.maximized
 
 
 <Player>:
     canvas.before:
         Color:
-            rgba: 0, 0, 0, 1 # Red background (R, G, B, A)
+            rgba: 0, 0, 0, 1
         Rectangle:
             pos: self.pos
             size: self.size
@@ -80,7 +93,8 @@
 
 <PlayerButton>:
     line_color_focus: app.transparent
-    role: "Medium" if DEVICE_TYPE == "mobile" else "Large Productive"
+    role: "Small" if DEVICE_TYPE == "mobile" else "Large Productive"
+    font_size: sp(14) if self.role == "Small" else sp(16)
 
 
 <PlayerLoadingLayout>:
@@ -88,3 +102,4 @@
     CLoadingIndicator:
         active: root.loading
         role: "Small"
+        stroke_width: dp(2)

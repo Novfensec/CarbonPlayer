@@ -4,7 +4,7 @@ from kivy.lang import Builder
 
 from uix import UIX
 
-from .player import PlayerBase, Player, PlayerButton, PlayerControls, PlayerLayout
+from .player import PlayerBase, Player, PlayerButton, PlayerControls, PlayerLayout, PlayerLoadingLayout
 
 filename = os.path.join(UIX, "player", "player.kv")
 if not filename in Builder.files:

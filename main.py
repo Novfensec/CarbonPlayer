@@ -10,6 +10,7 @@ resource_add_path(os.path.dirname(__file__))
 
 from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.properties import StringProperty
 
 from kivy import platform
 
@@ -18,7 +19,7 @@ if platform == "win":
         os.path.join(os.path.expanduser("~"), "Downloads", "ffmpeg", "bin")
     )  # Replace with the path of your ffmpeg dll bin directory. Only for windows.
 
-from uix.player import Player
+from uix.player import *
 
 def set_softinput(*args) -> None:
     Window.keyboard_anim_args = {"d": 0.2, "t": "in_out_expo"}
@@ -37,17 +38,39 @@ from carbonkivy.uix.screen import CScreen
 appkv = """
 CScreen:
 
-    CStackLayout:
+    CFloatLayout:
+
+        CBoxLayout:
+            padding: dp(16), dp(64)
+            orientation: "vertical"
+            adaptive: [False, True]
+            y: layout.y - self.height
+                
+            CTextInputLayout:
+
+                CTextInput:
+                    id: url_input
+                    text: app.url
+                    hint_text: "Enter video url or path."
+                CTextInputLabel:
+                    text: "Video url or path"
+                CTextInputTrailingIconButton:
+                    icon: "restart"
+                    on_press:
+                        app.url = url_input.text
+                        player_base.restart(app.url)
 
         PlayerLayout:
             id: layout
+            pos_hint: {"top": 1.0, "x": 0.0}
 
             Player:
                 id: player_base
                 loader: player_loading
                 size_hint: 1, 1
                 fit_mode: "contain"
-                filename: "https://storage.googleapis.com/exoplayer-test-media-1/mp4/android-screens-10s.mp4"
+                # filename: "https://storage.googleapis.com/exoplayer-test-media-1/mp4/android-screens-10s.mp4"
+                filename: app.url
 
             PlayerLoadingLayout:
                 id: player_loading
@@ -58,10 +81,15 @@ CScreen:
             PlayerButton:
                 icon: "overflow-menu--vertical"
                 pos_hint: {"top": 1.0, "right": 1.0}
+                text_color: "white"
+                bg_color: app.background_hover
 """
 
 
 class myapp(CarbonApp):
+
+    url = StringProperty("https://storage.googleapis.com/exoplayer-test-media-1/mp4/android-screens-10s.mp4")
+
     def __init__(self, *args, **kwargs):
         # self.theme = "Gray100"
         super(myapp, self).__init__(*args, **kwargs)
@@ -69,6 +97,12 @@ class myapp(CarbonApp):
     def build(self) -> CScreen:
         screen = Builder.load_string(appkv)
         return screen
+
+    def on_pause(self, *args) -> None:
+        self.root.ids.player_base.stop()
+
+    def on_stop(self, *args) -> None:
+        self.root.ids.player_base.stop()
 
 
 if __name__ == "__main__":
