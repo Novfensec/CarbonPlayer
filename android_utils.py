@@ -46,6 +46,16 @@ def maximize_video():
 def minimize_video():
     if platform == "android":
         listener_ref = None
+        app_bg_color = Color.BLACK
+        
+        try:
+            from carbonkivy.app import CarbonApp
+            from carbonkivy.utils import parse_color
+            
+            app_bg_color = parse_color(CarbonApp.get_running_app().background)
+        except Exception:
+            pass
+
         if Build.VERSION.SDK_INT >= 35:
             try:
                 from carbonkivy.utils import _global_listener
@@ -71,7 +81,7 @@ def minimize_video():
                 decor_view.setOnApplyWindowInsetsListener(listener_ref)
                 decor_view.requestApplyInsets()
             else:
-                window.setNavigationBarColor(Color.BLACK)
-                window.setStatusBarColor(Color.BLACK)
+                window.setNavigationBarColor(app_bg_color)
+                window.setStatusBarColor(app_bg_color)
 
         _minimize()
