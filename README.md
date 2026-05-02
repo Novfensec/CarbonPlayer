@@ -1,7 +1,7 @@
 # VideoNative Player with CarbonKivy
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Framework](https://img.shields.io/badge/UI-CarbonKivy-FF7B00.svg?style=for-the-badge)](https://github.com/Novfensec)
+[![Framework](https://img.shields.io/badge/UI-CarbonKivy-FF7B00.svg?style=for-the-badge)](https://github.com/CarbonKivy/CarbonKivy)
 [![Backend](https://img.shields.io/badge/Backend-videonative-85EA2D.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white)](https://github.com/novfensec/videonative)
 [![Platform Support](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20Android-purple.svg?style=for-the-badge)](https://github.com/Novfensec)
 
