@@ -1,8 +1,6 @@
 import os
 import sys
 
-os.environ["devicetype"] = "mobile"
-
 from kivy.resources import resource_add_path
 
 sys.path.insert(0, os.path.dirname(__file__))
