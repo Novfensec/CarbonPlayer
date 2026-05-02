@@ -10,7 +10,7 @@ resource_add_path(os.path.dirname(__file__))
 
 from kivy.clock import Clock
 from kivy.core.window import Window
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, BooleanProperty
 
 from kivy import platform
 
@@ -90,6 +90,8 @@ class myapp(CarbonApp):
 
     url = StringProperty("https://storage.googleapis.com/exoplayer-test-media-1/mp4/android-screens-10s.mp4")
 
+    _was_playing = BooleanProperty(False)
+
     def __init__(self, *args, **kwargs):
         # self.theme = "Gray100"
         super(myapp, self).__init__(*args, **kwargs)
@@ -99,12 +101,14 @@ class myapp(CarbonApp):
         return screen
 
     def on_resume(self, *args) -> None:
-        self.root.ids.player_base.play()
-        return super().on_resume()
+        if getattr(self, "_was_playing", False):
+            self.root.ids.player_base.play()
+        super().on_resume()
 
-    def on_pause(self, *args) -> None:
-        self.root.ids.player_base.stop()
-        return super().on_pause()
+    def on_pause(self, *args) -> bool:
+        self._was_playing = self.root.ids.player_base._running and not self.root.ids.player_base._paused
+        self.root.ids.player_base.pause()
+        return True
 
     def on_stop(self, *args) -> None:
         self.root.ids.player_base.stop()
