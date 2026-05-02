@@ -21,7 +21,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,mp4
 
 # (list) List of inclusions using pattern matching
-#source.include_patterns = assets/*,images/*.png
+#source.include_patterns = assets/*,images/*.png, assets/*.png
 
 # (list) Source files to exclude (leave empty to not exclude anything)
 source.exclude_exts = spec, exp, lib, obj, md, dll, c
@@ -49,14 +49,14 @@ requirements = python3, kivy==2.3.1, ffmpeg, videonative, pyjnius, android, http
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-#presplash.filename = %(source.dir)s/data/presplash.png
+presplash.filename = %(source.dir)s/assets/presplash.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+icon.filename = %(source.dir)s/assets/icon.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse, landscape-reverse, or all
-orientation = portrait, landscape
+orientation = portrait, landscape, portrait-reverse, landscape-reverse
 
 # (list) List of services to declare
 # This is currently only relevant to Android services.
