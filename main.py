@@ -98,8 +98,13 @@ class myapp(CarbonApp):
         screen = Builder.load_string(appkv)
         return screen
 
+    def on_resume(self, *args) -> None:
+        self.root.ids.player_base.play()
+        return super().on_resume()
+
     def on_pause(self, *args) -> None:
         self.root.ids.player_base.stop()
+        return super().on_pause()
 
     def on_stop(self, *args) -> None:
         self.root.ids.player_base.stop()

@@ -32,7 +32,7 @@
     adaptive: [False, True]
     bg_color: app.layer_selected_01
     spacing: dp(8)
-    padding: dp(4)
+    padding: dp(16), dp(8)
 
     CGridLayout:
         adaptive: [True, True]
@@ -59,7 +59,7 @@
                 root.volume_enabled = not root.volume_enabled
 
     CLabel:
-        text: f"{root.current_timestamp} / {root.duration_timestamp}"
+        text: f"{root.current_timestamp} / {root.duration_timestamp}" if root.current_timestamp else ""
         pos_hint: {"center_y": 0.5}
         style: "label_01"
         height: self.texture_size[1]

@@ -1,9 +1,11 @@
 from kivy.utils import platform
+from kivy.app import App
 
 if platform == "android":
     from jnius import autoclass
     from android import mActivity
     from android.runnable import run_on_ui_thread
+    from carbonkivy.utils import parse_color
 
     ActivityInfo = autoclass("android.content.pm.ActivityInfo")
     View = autoclass("android.view.View")
@@ -17,11 +19,15 @@ def maximize_video():
 
         @run_on_ui_thread
         def _maximize():
+            window = mActivity.getWindow()
+            decor_view = window.getDecorView()
+
+            if Build.VERSION.SDK_INT >= 35:
+                decor_view.setOnApplyWindowInsetsListener(None)
+
             mActivity.setRequestedOrientation(
                 ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             )
-
-            window = mActivity.getWindow()
 
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
@@ -34,7 +40,6 @@ def maximize_video():
                 attributes.layoutInDisplayCutoutMode = 1
                 window.setAttributes(attributes)
 
-            decor_view = window.getDecorView()
             decor_view.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -52,21 +57,30 @@ def minimize_video():
 
         @run_on_ui_thread
         def _minimize():
+            window = mActivity.getWindow()
+            decor_view = window.getDecorView()
+
             mActivity.setRequestedOrientation(
                 ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             )
-
-            window = mActivity.getWindow()
-
-            window.setNavigationBarColor(Color.BLACK)
-            window.setStatusBarColor(Color.BLACK)
 
             if Build.VERSION.SDK_INT >= 28:
                 attributes = window.getAttributes()
                 attributes.layoutInDisplayCutoutMode = 0
                 window.setAttributes(attributes)
 
-            decor_view = window.getDecorView()
             decor_view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE)
+
+            if Build.VERSION.SDK_INT >= 35:
+                try:
+                    from carbonkivy.utils import _global_listener
+
+                    decor_view.setOnApplyWindowInsetsListener(_global_listener)
+                    decor_view.requestApplyInsets()
+                except ImportError:
+                    pass
+            else:
+                window.setNavigationBarColor(parse_color(App.get_running_app().background))
+                window.setStatusBarColor(parse_color(App.get_running_app().background))
 
         _minimize()
