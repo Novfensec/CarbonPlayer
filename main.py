@@ -80,7 +80,7 @@ CScreen:
 
             PlayerButton:
                 icon: "overflow-menu--vertical"
-                pos_hint: {"top": 1.0, "right": 1.0}
+                pos: layout.width - self.width - dp(8), layout.height - self.width - dp(8)
                 text_color: "white"
                 bg_color: app.background_hover
 """

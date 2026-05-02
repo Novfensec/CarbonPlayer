@@ -9,9 +9,10 @@ if platform == "android":
 
     ActivityInfo = autoclass("android.content.pm.ActivityInfo")
     View = autoclass("android.view.View")
-    WindowManager = autoclass("android.view.WindowManager")
+    LayoutParams = autoclass("android.view.WindowManager$LayoutParams")
     Color = autoclass("android.graphics.Color")
-    Build = autoclass("android.os.Build")
+    BuildVERSION = autoclass("android.os.Build$VERSION")
+    ContentView = mActivity.getWindow().findViewById(autoclass("android.R$id").content)
 
 
 def maximize_video():
@@ -22,20 +23,21 @@ def maximize_video():
             window = mActivity.getWindow()
             decor_view = window.getDecorView()
 
-            if Build.VERSION.SDK_INT >= 35:
+            if BuildVERSION.SDK_INT >= 35:
                 decor_view.setOnApplyWindowInsetsListener(None)
+                ContentView.setPadding(0, 0, 0, 0)
 
             mActivity.setRequestedOrientation(
                 ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             )
 
             window.addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+                LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
             )
             window.setNavigationBarColor(Color.TRANSPARENT)
             window.setStatusBarColor(Color.TRANSPARENT)
 
-            if Build.VERSION.SDK_INT >= 28:
+            if BuildVERSION.SDK_INT >= 28:
                 attributes = window.getAttributes()
                 attributes.layoutInDisplayCutoutMode = 1
                 window.setAttributes(attributes)
@@ -61,17 +63,17 @@ def minimize_video():
             decor_view = window.getDecorView()
 
             mActivity.setRequestedOrientation(
-                ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
             )
 
-            if Build.VERSION.SDK_INT >= 28:
+            if BuildVERSION.SDK_INT >= 28:
                 attributes = window.getAttributes()
                 attributes.layoutInDisplayCutoutMode = 0
                 window.setAttributes(attributes)
 
             decor_view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE)
 
-            if Build.VERSION.SDK_INT >= 35:
+            if BuildVERSION.SDK_INT >= 35:
                 try:
                     from carbonkivy.utils import _global_listener
 
