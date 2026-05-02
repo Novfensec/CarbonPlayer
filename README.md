@@ -27,7 +27,7 @@ The application is structured into three distinct layers to ensure optimal threa
    - Integrates seamlessly with Kivy's mobile application lifecycle to properly pause and resume decoders on background/foreground transitions.
 
 
-## 🛠️ Features
+## Features
 
 - **True Immersive Landscape Fullscreen:** Automatically rotates mobile screens to sensor landscape mode while rendering perfectly into camera cutouts and notches on Android 15 (SDK 35+).
 - **Responsive System UI:** Detaches status bar and navigation bar insets listeners during playback to prevent overlapping UI glitches, reverting cleanly on exit.
@@ -35,7 +35,7 @@ The application is structured into three distinct layers to ensure optimal threa
 - **Dynamic Play/Pause & Audio Lifecycle:** Synchronously halts or resumes decoding threads, preventing memory leaks and background audio ghosting.
 
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 
@@ -85,7 +85,7 @@ pip install -e .
 
 ---
 
-## 📱 Android Build Details
+## Android Build Details
 
 To compile this player for Android, configure your `buildozer.spec` file with the following requirements:
 
@@ -102,7 +102,7 @@ p4a.fork = novfensec
 p4a.branch = videonative
 ```
 
-## 📄 License
+## License
 
 This project is open-source and available under the MIT License. See the [LICENSE](LICENSE) file for more information.
 
