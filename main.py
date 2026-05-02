@@ -103,7 +103,7 @@ class myapp(CarbonApp):
         return super().on_resume()
 
     def on_pause(self, *args) -> None:
-        self.root.ids.player_base.stop()
+        self.root.ids.player_base.pause()
         return super().on_pause()
 
     def on_stop(self, *args) -> None:
