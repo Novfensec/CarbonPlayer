@@ -1,4 +1,4 @@
-# VideoNative Player with CarbonKivy
+# Carbon Design Video Player with CarbonKivy and VideoNative.
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Framework](https://img.shields.io/badge/UI-CarbonKivy-FF7B00.svg?style=for-the-badge)](https://github.com/CarbonKivy/CarbonKivy)
