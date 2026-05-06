@@ -7,6 +7,9 @@
 
 An ultra-responsive, threaded video player application built for both desktop and mobile devices. By combining the sleek design language of **CarbonKivy** with the high-performance decoding engine of **videonative** (a custom C++ module bridging FFmpeg and Pybind11), this player guarantees smooth, millisecond-accurate multimedia playback.
 
+![CarbonPlayer](https://raw.githubusercontent.com/Novfensec/CarbonPlayer/refs/heads/main/.images/carbonplayer.png)
+
+Donwnload Android app from: https://drive.google.com/file/d/1aostQVifSw22IDvEiihcofO6OFlXGf8o/view?usp=drivesdk
 
 ## Architectural Overview
 
