@@ -31,7 +31,6 @@ from kivy.lang import Builder
 from carbonkivy.app import CarbonApp
 from carbonkivy.uix.screen import CScreen
 
-# import factory_registers
 
 appkv = """
 CScreen:
@@ -92,6 +91,8 @@ class myapp(CarbonApp):
 
     def __init__(self, *args, **kwargs):
         # self.theme = "Gray100"
+        self.title = "CarbonPlayer"
+        self.icon = "assets/icon.png"
         super(myapp, self).__init__(*args, **kwargs)
 
     def build(self) -> CScreen:
