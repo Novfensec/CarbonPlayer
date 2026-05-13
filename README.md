@@ -11,6 +11,8 @@ An ultra-responsive, threaded video player application built for both desktop an
 
 Donwnload Android app from: https://drive.google.com/file/d/1aostQVifSw22IDvEiihcofO6OFlXGf8o/view?usp=drivesdk
 
+<!-- GitAds-Verify: F36Z7VS6EMDMRDGV8A1SY4GJQSWMBU4H -->
+
 ## Architectural Overview
 
 The application is structured into three distinct layers to ensure optimal threading, zero UI lag, and smooth rendering:
