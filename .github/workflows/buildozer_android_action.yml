@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt-get install -y \
+          sudo apt install -y \
             ant \
             build-essential \
             git \
@@ -65,8 +65,7 @@ jobs:
             libavcodec-dev \
             libunwind-dev \
             zlib1g-dev \
-            autoconf-archive
-          sudo apt-get install -y \
+            autoconf-archive \
             libsqlite3-dev \
             sqlite3 \
             bzip2 \
@@ -78,10 +77,6 @@ jobs:
             liblzma-dev \
             libreadline-dev \
             uuid-dev \
-            libgstreamer1.0 \
-            gstreamer1.0-plugins-base \
-            gstreamer1.0-plugins-good
-          sudo apt-get install -y \
             zip \
             unzip \
             autoconf \
